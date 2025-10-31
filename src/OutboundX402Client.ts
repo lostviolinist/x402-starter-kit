@@ -54,6 +54,12 @@ export class OutboundX402Client {
         };
       }
 
+      const settleDelayMs = Number(process.env.PAYMENT_SETTLE_DELAY_MS ?? 8000);
+      if (settleDelayMs > 0) {
+        console.log(`⏳ Waiting ${settleDelayMs}ms for transaction to settle...`);
+        await new Promise(resolve => setTimeout(resolve, settleDelayMs));
+      }
+      
       console.log('✅ Payment successful, resubmitting request with payment...');
       const paidResponse = await this.sendPaidRequest(url, text, paymentResult.payload, initialResponse);
 
@@ -91,7 +97,7 @@ export class OutboundX402Client {
       ],
     };
 
-    const response = await fetch(`${url}/process`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +131,7 @@ export class OutboundX402Client {
       },
     };
 
-    const response = await fetch(`${url}/process`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
